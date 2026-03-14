@@ -3,7 +3,7 @@ Contributors: andale
 Tags: performance, pagespeed, core web vitals, tracking, optimization
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,20 @@ Andale dashboard. One setting — instant results.
 * Injects performance hints (preconnect, font-display: swap, fetchpriority)
 * Reports before/after PageSpeed scores to your dashboard
 * Zero configuration — works out of the box with your Site ID
+
+**Server-Side Optimization (New in v1.1)**
+
+The plugin now directly modifies WordPress HTML output to:
+
+* Defer render-blocking JavaScript (saves 300-800ms)
+* Load CSS asynchronously (eliminates render-blocking)
+* Defer tracking scripts (GTM, HotJar, FB Pixel + 15 others)
+* Add font-display: swap to all web fonts
+* Optimize image loading with lazy/eager/fetchpriority
+* Inject preconnect hints for external resources
+
+No API calls, no external services required for basic optimization.
+Add your Andale Site ID to also get performance monitoring.
 
 **Compatible with all major caching plugins**, including WP Rocket, W3 Total
 Cache, LiteSpeed Cache, and WP Super Cache. Andale outputs a single async
@@ -81,6 +95,17 @@ A quick-access link is also available on your WordPress admin dashboard widget.
 
 == Changelog ==
 
+= 1.1.0 =
+* New: Server-side HTML optimization via PHP output buffering.
+* New: Defer render-blocking JavaScript with `defer` attribute injection.
+* New: Non-blocking CSS loading via preload pattern (eliminates render-blocking stylesheets).
+* New: Image optimization — lazy/eager loading, decoding="async", fetchpriority="high" on LCP image.
+* New: font-display: swap injected into all inline @font-face blocks.
+* New: Preconnect hints for safe external domains (Google Fonts, jsDelivr, etc.).
+* New: Tracking script deferral (20+ vendors) via PHP regex — GTM, GA, FB Pixel, HotJar, and more.
+* New: Settings section "Server-Side Optimization" with per-feature toggles.
+* New: Skip optimization for logged-in users option (recommended, on by default).
+
 = 1.0.0 =
 * Initial release.
 * Snippet injection via wp_head (default) or wp_footer.
@@ -90,6 +115,10 @@ A quick-access link is also available on your WordPress admin dashboard widget.
 * Dashboard widget with link to Andale reporting.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+New server-side HTML optimization engine. Enable under Settings → Andale → Server-Side Optimization.
+No breaking changes — existing settings are preserved.
 
 = 1.0.0 =
 Initial release. No upgrade steps required.

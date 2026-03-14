@@ -3,7 +3,7 @@
  * Plugin Name: Andale Page Speed Optimizer
  * Plugin URI: https://andale.sh
  * Description: Automatically optimize your WordPress pages for sub-1-second loads. Defers tracking scripts, lazy-loads images, and reports Core Web Vitals to your Andale dashboard.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Andale
  * Author URI: https://andale.sh
  * License: GPL v2 or later
@@ -17,13 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ANDALE_VERSION', '1.0.0' );
+define( 'ANDALE_VERSION', '1.1.0' );
 define( 'ANDALE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ANDALE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'ANDALE_OPTION_KEY', 'andale_settings' );
 
 require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-snippet.php';
 require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-admin.php';
+require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-optimizer.php';
 
 /**
  * Returns the plugin's settings array with defaults applied.
@@ -32,10 +33,19 @@ require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-admin.php';
  */
 function andale_get_settings() {
 	$defaults = array(
-		'site_id'            => '',
-		'injection_location' => 'head',
-		'excluded_paths'     => '',
-		'enabled'            => true,
+		'site_id'              => '',
+		'injection_location'   => 'head',
+		'excluded_paths'       => '',
+		'enabled'              => true,
+		// Server-side optimisation defaults (all on except skip_logged_in).
+		'server_optimize'      => false,
+		'opt_defer_scripts'    => true,
+		'opt_non_blocking_css' => true,
+		'opt_images'           => true,
+		'opt_font_display'     => true,
+		'opt_preconnect'       => true,
+		'opt_defer_tracking'   => true,
+		'skip_logged_in'       => true,
 	);
 
 	$saved = get_option( ANDALE_OPTION_KEY, array() );
@@ -52,6 +62,10 @@ function andale_init() {
 	// Front-end snippet injection.
 	$snippet = new Andale_Snippet( $settings );
 	$snippet->init();
+
+	// Server-side HTML optimisation (output buffering).
+	$optimizer = new Andale_Optimizer( $settings );
+	$optimizer->init();
 
 	// Admin UI (only in wp-admin).
 	if ( is_admin() ) {

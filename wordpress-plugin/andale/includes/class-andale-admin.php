@@ -191,14 +191,23 @@ class Andale_Admin {
 				$errors[] = __( 'Security check failed. Please try again.', 'andale' );
 			} else {
 				$new_settings = array(
-					'site_id'            => sanitize_text_field( wp_unslash( isset( $_POST['andale_site_id'] ) ? $_POST['andale_site_id'] : '' ) ),
-					'injection_location' => in_array(
+					'site_id'              => sanitize_text_field( wp_unslash( isset( $_POST['andale_site_id'] ) ? $_POST['andale_site_id'] : '' ) ),
+					'injection_location'   => in_array(
 						isset( $_POST['andale_injection_location'] ) ? $_POST['andale_injection_location'] : '',
 						array( 'head', 'footer' ),
 						true
 					) ? sanitize_text_field( wp_unslash( $_POST['andale_injection_location'] ) ) : 'head',
-					'excluded_paths'     => sanitize_textarea_field( wp_unslash( isset( $_POST['andale_excluded_paths'] ) ? $_POST['andale_excluded_paths'] : '' ) ),
-					'enabled'            => isset( $_POST['andale_enabled'] ) ? true : false,
+					'excluded_paths'       => sanitize_textarea_field( wp_unslash( isset( $_POST['andale_excluded_paths'] ) ? $_POST['andale_excluded_paths'] : '' ) ),
+					'enabled'              => isset( $_POST['andale_enabled'] ) ? true : false,
+					// Server-side optimisation.
+					'server_optimize'      => isset( $_POST['andale_server_optimize'] ) ? true : false,
+					'opt_defer_scripts'    => isset( $_POST['andale_opt_defer_scripts'] ) ? true : false,
+					'opt_non_blocking_css' => isset( $_POST['andale_opt_non_blocking_css'] ) ? true : false,
+					'opt_images'           => isset( $_POST['andale_opt_images'] ) ? true : false,
+					'opt_font_display'     => isset( $_POST['andale_opt_font_display'] ) ? true : false,
+					'opt_preconnect'       => isset( $_POST['andale_opt_preconnect'] ) ? true : false,
+					'opt_defer_tracking'   => isset( $_POST['andale_opt_defer_tracking'] ) ? true : false,
+					'skip_logged_in'       => isset( $_POST['andale_skip_logged_in'] ) ? true : false,
 				);
 
 				update_option( ANDALE_OPTION_KEY, $new_settings );
@@ -210,10 +219,19 @@ class Andale_Admin {
 		}
 
 		// Current values for rendering.
-		$site_id            = isset( $this->settings['site_id'] ) ? $this->settings['site_id'] : '';
-		$injection_location = isset( $this->settings['injection_location'] ) ? $this->settings['injection_location'] : 'head';
-		$excluded_paths     = isset( $this->settings['excluded_paths'] ) ? $this->settings['excluded_paths'] : '';
-		$enabled            = isset( $this->settings['enabled'] ) ? (bool) $this->settings['enabled'] : true;
+		$site_id               = isset( $this->settings['site_id'] ) ? $this->settings['site_id'] : '';
+		$injection_location    = isset( $this->settings['injection_location'] ) ? $this->settings['injection_location'] : 'head';
+		$excluded_paths        = isset( $this->settings['excluded_paths'] ) ? $this->settings['excluded_paths'] : '';
+		$enabled               = isset( $this->settings['enabled'] ) ? (bool) $this->settings['enabled'] : true;
+		// Server-side optimisation.
+		$server_optimize       = isset( $this->settings['server_optimize'] ) ? (bool) $this->settings['server_optimize'] : false;
+		$opt_defer_scripts     = isset( $this->settings['opt_defer_scripts'] ) ? (bool) $this->settings['opt_defer_scripts'] : true;
+		$opt_non_blocking_css  = isset( $this->settings['opt_non_blocking_css'] ) ? (bool) $this->settings['opt_non_blocking_css'] : true;
+		$opt_images            = isset( $this->settings['opt_images'] ) ? (bool) $this->settings['opt_images'] : true;
+		$opt_font_display      = isset( $this->settings['opt_font_display'] ) ? (bool) $this->settings['opt_font_display'] : true;
+		$opt_preconnect        = isset( $this->settings['opt_preconnect'] ) ? (bool) $this->settings['opt_preconnect'] : true;
+		$opt_defer_tracking    = isset( $this->settings['opt_defer_tracking'] ) ? (bool) $this->settings['opt_defer_tracking'] : true;
+		$skip_logged_in        = isset( $this->settings['skip_logged_in'] ) ? (bool) $this->settings['skip_logged_in'] : true;
 
 		?>
 		<div class="wrap andale-settings-wrap">
