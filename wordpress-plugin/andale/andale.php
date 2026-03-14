@@ -1,0 +1,88 @@
+<?php
+/**
+ * Plugin Name: Andale Page Speed Optimizer
+ * Plugin URI: https://andale.sh
+ * Description: Automatically optimize your WordPress pages for sub-1-second loads. Defers tracking scripts, lazy-loads images, and reports Core Web Vitals to your Andale dashboard.
+ * Version: 1.0.0
+ * Author: Andale
+ * Author URI: https://andale.sh
+ * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: andale
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+define( 'ANDALE_VERSION', '1.0.0' );
+define( 'ANDALE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'ANDALE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'ANDALE_OPTION_KEY', 'andale_settings' );
+
+require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-snippet.php';
+require_once ANDALE_PLUGIN_DIR . 'includes/class-andale-admin.php';
+
+/**
+ * Returns the plugin's settings array with defaults applied.
+ *
+ * @return array
+ */
+function andale_get_settings() {
+	$defaults = array(
+		'site_id'            => '',
+		'injection_location' => 'head',
+		'excluded_paths'     => '',
+		'enabled'            => true,
+	);
+
+	$saved = get_option( ANDALE_OPTION_KEY, array() );
+
+	return wp_parse_args( $saved, $defaults );
+}
+
+/**
+ * Bootstrap: initialise the snippet injector and admin UI.
+ */
+function andale_init() {
+	$settings = andale_get_settings();
+
+	// Front-end snippet injection.
+	$snippet = new Andale_Snippet( $settings );
+	$snippet->init();
+
+	// Admin UI (only in wp-admin).
+	if ( is_admin() ) {
+		$admin = new Andale_Admin( $settings );
+		$admin->init();
+	}
+}
+add_action( 'plugins_loaded', 'andale_init' );
+
+/**
+ * On activation: set default options if not already present.
+ */
+function andale_activate() {
+	if ( false === get_option( ANDALE_OPTION_KEY ) ) {
+		add_option(
+			ANDALE_OPTION_KEY,
+			array(
+				'site_id'            => '',
+				'injection_location' => 'head',
+				'excluded_paths'     => '',
+				'enabled'            => true,
+			)
+		);
+	}
+}
+register_activation_hook( __FILE__, 'andale_activate' );
+
+/**
+ * On deactivation: nothing to clean up (settings intentionally preserved).
+ */
+function andale_deactivate() {
+	// Intentionally empty — settings are kept so reinstalling is seamless.
+}
+register_deactivation_hook( __FILE__, 'andale_deactivate' );

@@ -1,0 +1,143 @@
+/* ==========================================================================
+   Andale Admin Styles
+   Minimal, clean — complements wp-admin without fighting it.
+   ========================================================================== */
+
+/* ── Page wrapper ───────────────────────────────────────────────────────── */
+.andale-settings-wrap {
+	max-width: 780px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.andale-settings-header {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	margin: 20px 0 16px;
+	border-bottom: 1px solid #dcdcde;
+	padding-bottom: 14px;
+}
+
+.andale-settings-header h1 {
+	font-size: 1.6rem;
+	margin: 0;
+}
+
+.andale-settings-header__tagline {
+	margin: 0;
+	color: #646970;
+	font-size: 0.9rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────── */
+.andale-settings-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 4px 24px 20px;
+	margin-bottom: 16px;
+}
+
+/* ── Site ID row (input + button inline) ────────────────────────────────── */
+.andale-site-id-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.andale-verify-btn {
+	white-space: nowrap;
+}
+
+/* ── Radio labels ────────────────────────────────────────────────────────── */
+.andale-radio-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	line-height: 1.6;
+	cursor: pointer;
+}
+
+/* ── Recommended badge ───────────────────────────────────────────────────── */
+.andale-badge {
+	display: inline-block;
+	font-size: 0.7rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	padding: 1px 6px;
+	border-radius: 3px;
+	vertical-align: middle;
+}
+
+.andale-badge--recommended {
+	background: #d7edde;
+	color: #1a6130;
+}
+
+/* ── Toggle (checkbox + label inline) ───────────────────────────────────── */
+.andale-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.andale-toggle__label {
+	line-height: 1.4;
+}
+
+/* ── Status indicators ───────────────────────────────────────────────────── */
+.andale-status {
+	margin: 0 0 6px;
+	font-weight: 500;
+}
+
+.andale-status--active {
+	color: #1a6130;
+}
+
+.andale-status--inactive {
+	color: #b45309;
+}
+
+.andale-status--disabled {
+	color: #646970;
+}
+
+/* ── Dashboard widget ────────────────────────────────────────────────────── */
+.andale-widget__status {
+	margin-bottom: 10px;
+	font-weight: 500;
+}
+
+.andale-widget__status--active {
+	color: #1a6130;
+}
+
+.andale-widget__status--inactive {
+	color: #b45309;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.andale-settings-footer {
+	color: #646970;
+	font-size: 0.85rem;
+	border-top: 1px solid #dcdcde;
+	padding-top: 10px;
+}
+
+.andale-settings-footer p {
+	margin: 4px 0;
+}
+
+.andale-settings-footer__version {
+	opacity: 0.7;
+}
+
+/* ── Required asterisk ───────────────────────────────────────────────────── */
+.andale-required {
+	color: #d63638;
+	margin-left: 2px;
+}
