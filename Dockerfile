@@ -31,9 +31,12 @@ RUN ls -la /app/dist/capture.js /app/dist/transform.js /app/dist/report.js
 COPY web/package*.json ./web/
 RUN cd web && npm ci
 
-# Copy web source and build (clean .next to avoid stale cache)
+# Cache bust: change this value to force a clean build
+ARG CACHE_BUST=v3
+
+# Copy web source and build
 COPY web/ ./web/
-RUN cd web && rm -rf .next && npm run build
+RUN cd web && rm -rf .next && npm run build && echo "Build version: ${CACHE_BUST}"
 
 EXPOSE 3000
 ENV PORT=3000
