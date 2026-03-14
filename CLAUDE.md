@@ -103,21 +103,27 @@ The key insight: marketing pages are slow because tracking scripts block paint. 
 
 ## Roadmap
 
-### v0.2 — CLI Polish
-- [ ] `--deploy cloudflare` — auto-deploy to CF Pages
-- [ ] `--deploy vercel` — auto-deploy to Vercel
-- [ ] `--report` — run Lighthouse, output PageSpeed score before/after
-- [ ] `--diff` — screenshot original vs clone side-by-side
-- [ ] README.md with benchmarks and demo GIF
-- [ ] npm publish as `andale`
+### v0.2 — CLI Polish (DONE)
+- [x] `--deploy cloudflare` — auto-deploy to CF Pages
+- [x] `--deploy vercel` — auto-deploy to Vercel
+- [x] `--report` — run Lighthouse, output PageSpeed score before/after
+- [x] README.md with pipeline diagram, vendor list, roadmap
+- [x] 11-stage optimization pipeline (tracking, images, fonts, loading, minification)
+- [x] Developer changelog in output
+- [x] `--diff` — screenshot original vs clone side-by-side
+- [ ] npm publish as `andale-cli`
 - [ ] GitHub Actions CI
 
-### v0.3 — Web App (andale.sh)
-- [ ] Web frontend — paste a URL, get optimized clone + PageSpeed report
-- [ ] Hosted output — each clone gets a subdomain (e.g., `yoursite.andale.sh`)
-- [ ] Before/after comparison — side-by-side screenshots + Lighthouse scores
-- [ ] Queue system — clone jobs processed async, webhook/email on completion
-- [ ] Dashboard — history of clones, scores, deploy status
+### v0.3 — Web App (andale.sh) (IN PROGRESS)
+- [x] Web frontend — paste a URL, get optimized clone + PageSpeed report
+- [x] Live preview at /preview/<id> with noindex + 24h cleanup
+- [x] Download clone as HTML
+- [x] Developer changelog on results page
+- [x] PageSpeed Insights link (test optimized clone on Google PSI)
+- [x] Before/after screenshots side-by-side
+- [ ] Queue system (Redis/BullMQ) for concurrent clones
+- [ ] Dashboard — history of clones, scores
+- [ ] Share results page (public URL for stakeholders)
 
 ### v1.0 — SaaS
 - [ ] User accounts + API keys
@@ -127,9 +133,14 @@ The key insight: marketing pages are slow because tracking scripts block paint. 
 - [ ] Webhook notifications
 - [ ] Usage-based pricing
 
-### Future
+### Future Optimizations
+- [ ] AVIF image conversion (next-gen after WebP)
+- [ ] Critical CSS extraction (above-fold inline, rest deferred)
+- [ ] Unused CSS removal (PurgeCSS)
+- [ ] Width/height dimension injection on all images (CLS)
+- [ ] Responsive images with srcset generation
+- [ ] Remove render-blocking external stylesheets
 - [ ] Config file support (`.andalrc`)
-- [ ] Critical CSS extraction (inline above-fold only)
 - [ ] Multi-page support (clone entire site)
 - [ ] A/B testing — serve original vs clone, measure conversion difference
 
