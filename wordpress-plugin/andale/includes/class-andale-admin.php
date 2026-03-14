@@ -433,6 +433,72 @@ class Andale_Admin {
 						</tr>
 					</table>
 
+					<!-- ── Server-Side Optimization ─────────────────────── -->
+					<hr style="margin: 24px 0;" />
+					<h2 style="padding-left: 0;"><?php esc_html_e( 'Server-Side Optimization', 'andale' ); ?></h2>
+					<p class="description" style="margin-bottom: 16px;">
+						<?php esc_html_e( 'Directly modifies WordPress HTML output before it reaches the browser. Works without a Site ID. Fixes render-blocking scripts, non-blocking CSS, image loading, font-display, and defers tracking scripts.', 'andale' ); ?>
+					</p>
+
+					<table class="form-table" role="presentation">
+						<tr>
+							<th scope="row">
+								<?php esc_html_e( 'Enable', 'andale' ); ?>
+							</th>
+							<td>
+								<label class="andale-toggle">
+									<input type="checkbox" name="andale_server_optimize" value="1" <?php checked( $server_optimize, true ); ?> id="andale_server_optimize" />
+									<span class="andale-toggle__label">
+										<?php esc_html_e( 'Enable server-side HTML optimization', 'andale' ); ?>
+									</span>
+								</label>
+								<p class="description"><?php esc_html_e( 'Uses PHP output buffering to optimize every page before delivery.', 'andale' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Optimizations', 'andale' ); ?></th>
+							<td>
+								<fieldset>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_defer_scripts" value="1" <?php checked( $opt_defer_scripts, true ); ?> />
+										<?php esc_html_e( 'Defer render-blocking scripts', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'Adds defer attribute to non-critical JS. Saves 300–800ms.', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_non_blocking_css" value="1" <?php checked( $opt_non_blocking_css, true ); ?> />
+										<?php esc_html_e( 'Non-blocking CSS loading', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'Converts stylesheets to async preload pattern. Eliminates render-blocking CSS.', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_images" value="1" <?php checked( $opt_images, true ); ?> />
+										<?php esc_html_e( 'Optimize image loading', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'lazy/eager/fetchpriority/decoding attributes on all images.', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_font_display" value="1" <?php checked( $opt_font_display, true ); ?> />
+										<?php esc_html_e( 'Add font-display: swap', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'Prevents invisible text during font loading (FOIT).', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_preconnect" value="1" <?php checked( $opt_preconnect, true ); ?> />
+										<?php esc_html_e( 'Add preconnect hints', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'Pre-connects to Google Fonts, jsDelivr, and other common CDNs.', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_opt_defer_tracking" value="1" <?php checked( $opt_defer_tracking, true ); ?> />
+										<?php esc_html_e( 'Defer tracking scripts', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'GTM, GA, Facebook Pixel, HotJar, Amplitude + 15 others fire on first interaction. TBT drops to 0.', 'andale' ); ?></span>
+									</label>
+									<label style="display:block;margin-bottom:8px;">
+										<input type="checkbox" name="andale_skip_logged_in" value="1" <?php checked( $skip_logged_in, true ); ?> />
+										<?php esc_html_e( 'Skip optimization for logged-in users', 'andale' ); ?>
+										<span class="description"> &mdash; <?php esc_html_e( 'Recommended. Admins see the real page for editing.', 'andale' ); ?></span>
+									</label>
+								</fieldset>
+							</td>
+						</tr>
+					</table>
+
 					<p class="submit">
 						<input
 							type="submit"
