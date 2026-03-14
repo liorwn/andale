@@ -77,3 +77,28 @@ export const TRACKING_PATTERNS = {
 } as const
 
 export type TrackingVendor = keyof typeof TRACKING_PATTERNS
+
+// Lighthouse report types
+export interface LighthouseMetrics {
+  performanceScore: number  // 0-100
+  fcp: number               // First Contentful Paint (ms)
+  lcp: number               // Largest Contentful Paint (ms)
+  tbt: number               // Total Blocking Time (ms)
+  cls: number               // Cumulative Layout Shift (unitless)
+  si: number                // Speed Index (ms)
+}
+
+export interface ReportComparison {
+  original: LighthouseMetrics
+  clone: LighthouseMetrics
+  deltas: LighthouseMetricDeltas
+}
+
+export interface LighthouseMetricDeltas {
+  performanceScore: number
+  fcp: number
+  lcp: number
+  tbt: number
+  cls: number
+  si: number
+}

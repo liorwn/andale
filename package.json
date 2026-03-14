@@ -1,7 +1,7 @@
 {
   "name": "andale",
   "version": "0.1.0",
-  "description": "Clone any web page into a speed-optimized static site. Pixel-perfect rendering, deferred tracking, sub-1-second loads. \u00a1\u00c1ndale\\!",
+  "description": "Clone any web page into a speed-optimized static site. Pixel-perfect rendering, deferred tracking, sub-1-second loads. ¡Ándale\\!",
   "type": "module",
   "bin": {
     "andale": "./dist/cli.js"
@@ -26,6 +26,7 @@
     "chalk": "^5.6.2",
     "cheerio": "^1.2.0",
     "commander": "^14.0.3",
+    "lighthouse": "^13.0.3",
     "ora": "^9.3.0",
     "sharp": "^0.34.5"
   },

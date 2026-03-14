@@ -1,4 +1,5 @@
 export { capture } from './capture.js'
 export { transform } from './transform.js'
 export { deploy } from './deploy.js'
-export type { EdgeCloneOptions, EdgeCloneResult } from './types.js'
+export { runLighthouse, buildComparison, renderComparisonTable, serveDirectory } from './report.js'
+export type { EdgeCloneOptions, EdgeCloneResult, LighthouseMetrics, ReportComparison, LighthouseMetricDeltas } from './types.js'

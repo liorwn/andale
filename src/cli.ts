@@ -7,6 +7,7 @@ import ora from 'ora'
 import { capture } from './capture.js'
 import { transform } from './transform.js'
 import { deploy } from './deploy.js'
+import { runLighthouse, buildComparison, renderComparisonTable, serveDirectory } from './report.js'
 import type { EdgeCloneOptions } from './types.js'
 
 const program = new Command()
@@ -24,6 +25,7 @@ program
   .option('--no-optimize-images', 'Skip image optimization')
   .option('--viewport <WxH>', 'Browser viewport size', '1440x4000')
   .option('--chrome-path <path>', 'Path to Chrome/Chromium executable')
+  .option('--report', 'Run Lighthouse and show before/after PageSpeed comparison')
   .option('--deploy <platform>', 'Deploy after clone (cloudflare, vercel)')
   .option('--name <name>', 'Project name for deployment (auto-generated from URL if omitted)')
   .action(async (url: string, opts: Record<string, any>) => {
@@ -111,6 +113,48 @@ program
       } catch (err: any) {
         deploySpinner.fail(`Deploy failed: ${err.message}`)
       }
+    }
+
+    // Step 5: Report (optional)
+    if (opts.report) {
+      console.log()
+      console.log(chalk.bold('  PageSpeed Report'))
+      console.log()
+
+      // Run Lighthouse on original URL
+      const originalSpinner = ora('Running Lighthouse on original URL...').start()
+      let originalMetrics
+      try {
+        originalMetrics = await runLighthouse(url)
+        originalSpinner.succeed(`Original: Performance ${chalk.bold(String(originalMetrics.performanceScore))}`)
+      } catch (err: any) {
+        originalSpinner.fail(`Lighthouse failed on original URL: ${err.message}`)
+        console.log()
+        process.exit(0)
+      }
+
+      // Serve the clone directory and run Lighthouse on it
+      const cloneSpinner = ora('Running Lighthouse on optimized clone...').start()
+      let cloneMetrics
+      try {
+        const { server, port } = await serveDirectory(outputDir)
+        try {
+          cloneMetrics = await runLighthouse(`http://127.0.0.1:${port}/`)
+          cloneSpinner.succeed(`Clone:    Performance ${chalk.bold(String(cloneMetrics.performanceScore))}`)
+        } finally {
+          server.close()
+        }
+      } catch (err: any) {
+        cloneSpinner.fail(`Lighthouse failed on clone: ${err.message}`)
+        console.log()
+        process.exit(0)
+      }
+
+      // Display comparison table
+      const comparison = buildComparison(originalMetrics, cloneMetrics)
+      const table = await renderComparisonTable(comparison)
+      console.log()
+      console.log(table)
     }
 
     console.log()
