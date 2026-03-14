@@ -31,9 +31,9 @@ RUN ls -la /app/dist/capture.js /app/dist/transform.js /app/dist/report.js
 COPY web/package*.json ./web/
 RUN cd web && npm ci
 
-# Copy web source and build
+# Copy web source and build (clean .next to avoid stale cache)
 COPY web/ ./web/
-RUN cd web && npm run build
+RUN cd web && rm -rf .next && npm run build
 
 EXPOSE 3000
 ENV PORT=3000

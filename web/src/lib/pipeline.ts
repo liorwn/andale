@@ -23,8 +23,13 @@ function loadCoreModule(moduleName: string) {
     resolve(cwd, "dist", `${moduleName}.js`),                  // dist in cwd
   ];
 
+  console.log(`[andale] Loading core module "${moduleName}", CWD: ${cwd}`);
+  console.log(`[andale] Search paths:`, searchPaths);
+
   for (const p of searchPaths) {
-    if (existsSync(p)) {
+    const found = existsSync(p);
+    console.log(`[andale]   ${found ? '✓' : '✗'} ${p}`);
+    if (found) {
       const req = createRequire(import.meta.url);
       return req(p);
     }
