@@ -31,6 +31,34 @@ export interface ChangeLogEntry {
   detail?: string;
 }
 
+export interface ScriptProfile {
+  vendor: string;
+  vendorName: string;
+  src?: string;
+  type: "external" | "inline" | "gtm-child";
+  estimatedSizeKb: number;
+  estimatedTbtMs: number;
+  currentLoading: "blocking" | "async" | "defer" | "deferred-by-andale";
+  recommendedTrigger:
+    | "page-load"
+    | "dom-ready"
+    | "window-loaded"
+    | "timer-5s"
+    | "interaction-only"
+    | "conversion-only";
+  priority: "critical" | "high" | "medium" | "low";
+  recommendation: string;
+  detail?: string;
+}
+
+export interface ScriptProfilingResult {
+  profiles: ScriptProfile[];
+  gtmContainerId?: string;
+  totalEstimatedTbtMs: number;
+  totalEstimatedSizeKb: number;
+  recommendations: string[];
+}
+
 export interface JobResult {
   metrics?: {
     original: LighthouseMetrics;
@@ -47,6 +75,7 @@ export interface JobResult {
     totalAssetSize: number;
   };
   changelog?: ChangeLogEntry[];
+  profiling?: ScriptProfilingResult;
   outputPath?: string;
   deployUrl?: string;
   hasScreenshots?: boolean;

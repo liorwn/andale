@@ -1,4 +1,5 @@
 import { deferTracking, stripTracking } from './transform/defer-tracking.js'
+import { profileScripts } from './transform/profile-scripts.js'
 import { extractAndOptimizeImages } from './transform/optimize-images.js'
 import { injectFontPreloads } from './transform/preload-fonts.js'
 import { injectPrefill } from './transform/inject-prefill.js'
@@ -25,6 +26,9 @@ export async function transform(
   let vendors: string[] = []
   let assets: ExtractedAsset[] = []
   const changelog: ChangeLogEntry[] = []
+
+  // Stage 0: Profile scripts BEFORE any modifications (analyzes original state)
+  const profilingResult = profileScripts(current)
 
   // Stage 1: Handle tracking scripts
   if (options.stripTracking) {
@@ -135,5 +139,5 @@ export async function transform(
     estimatedLoadTimeMs: Math.round((finalSize + totalAssetSize) / 1000 * 8),
   }
 
-  return { html: current, assets, stats, changelog }
+  return { html: current, assets, stats, changelog, profilingResult }
 }

@@ -31,6 +31,7 @@ export interface TransformResult {
   assets: ExtractedAsset[]
   stats: TransformStats
   changelog: ChangeLogEntry[]
+  profilingResult?: ScriptProfilingResult
 }
 
 export interface ExtractedAsset {
@@ -85,6 +86,29 @@ export const TRACKING_PATTERNS = {
 } as const
 
 export type TrackingVendor = keyof typeof TRACKING_PATTERNS
+
+// Script profiling types
+export interface ScriptProfile {
+  vendor: string
+  vendorName: string
+  src?: string
+  type: 'external' | 'inline' | 'gtm-child'
+  estimatedSizeKb: number
+  estimatedTbtMs: number
+  currentLoading: 'blocking' | 'async' | 'defer' | 'deferred-by-andale'
+  recommendedTrigger: 'page-load' | 'dom-ready' | 'window-loaded' | 'timer-5s' | 'interaction-only' | 'conversion-only'
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  recommendation: string
+  detail?: string
+}
+
+export interface ScriptProfilingResult {
+  profiles: ScriptProfile[]
+  gtmContainerId?: string
+  totalEstimatedTbtMs: number
+  totalEstimatedSizeKb: number
+  recommendations: string[]  // top-level summary recommendations
+}
 
 // Lighthouse report types
 export interface LighthouseMetrics {

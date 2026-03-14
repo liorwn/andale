@@ -133,8 +133,9 @@ export async function runPipeline(
       message: `Optimized: ${transformResult.stats.trackingScriptsDeferred} scripts deferred, ${transformResult.stats.imagesOptimized} images optimized`,
     });
 
-    // Capture changelog for the result
+    // Capture changelog and profiling for the result
     const changelog = transformResult.changelog || [];
+    const profiling = transformResult.profilingResult || undefined;
 
     // --- Stage 3: Lighthouse ---
     updateJob(jobId, {
@@ -170,6 +171,7 @@ export async function runPipeline(
           },
           outputPath: outputDir,
           changelog,
+          profiling,
           hasScreenshots,
         },
       });
@@ -216,6 +218,7 @@ export async function runPipeline(
         },
         outputPath: outputDir,
         changelog,
+        profiling,
         hasScreenshots,
       },
     });

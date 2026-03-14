@@ -36,6 +36,34 @@ interface ChangeLogEntry {
   detail?: string;
 }
 
+interface ScriptProfile {
+  vendor: string;
+  vendorName: string;
+  src?: string;
+  type: "external" | "inline" | "gtm-child";
+  estimatedSizeKb: number;
+  estimatedTbtMs: number;
+  currentLoading: "blocking" | "async" | "defer" | "deferred-by-andale";
+  recommendedTrigger:
+    | "page-load"
+    | "dom-ready"
+    | "window-loaded"
+    | "timer-5s"
+    | "interaction-only"
+    | "conversion-only";
+  priority: "critical" | "high" | "medium" | "low";
+  recommendation: string;
+  detail?: string;
+}
+
+interface ScriptProfilingResult {
+  profiles: ScriptProfile[];
+  gtmContainerId?: string;
+  totalEstimatedTbtMs: number;
+  totalEstimatedSizeKb: number;
+  recommendations: string[];
+}
+
 interface JobResult {
   metrics?: {
     original: LighthouseMetrics;
@@ -52,6 +80,7 @@ interface JobResult {
     totalAssetSize: number;
   };
   changelog?: ChangeLogEntry[];
+  profiling?: ScriptProfilingResult;
   outputPath?: string;
   deployUrl?: string;
   hasScreenshots?: boolean;
@@ -253,6 +282,11 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
             {/* Changelog — what was modified */}
             {job.result.changelog && job.result.changelog.length > 0 && (
               <ChangeLog entries={job.result.changelog} />
+            )}
+
+            {/* Script Analysis */}
+            {job.result.profiling && job.result.profiling.profiles.length > 0 && (
+              <ScriptAnalysis profiling={job.result.profiling} />
             )}
 
             {/* Lighthouse Comparison */}
@@ -539,6 +573,121 @@ function ComparisonTable({
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+const PRIORITY_STYLES: Record<string, { border: string; bg: string; text: string; label: string }> = {
+  critical: { border: "border-red-500/40", bg: "bg-red-500/10", text: "text-red-400", label: "Critical" },
+  high: { border: "border-orange-500/40", bg: "bg-orange-500/10", text: "text-orange-400", label: "High" },
+  medium: { border: "border-yellow-500/40", bg: "bg-yellow-500/10", text: "text-yellow-400", label: "Medium" },
+  low: { border: "border-green-500/40", bg: "bg-green-500/10", text: "text-green-400", label: "Low" },
+};
+
+const LOADING_LABELS: Record<string, string> = {
+  blocking: "Blocking",
+  async: "Async",
+  defer: "Defer",
+  "deferred-by-andale": "Deferred by Andale",
+};
+
+const TRIGGER_LABELS: Record<string, string> = {
+  "page-load": "Page Load",
+  "dom-ready": "DOM Ready",
+  "window-loaded": "Window Loaded",
+  "timer-5s": "Timer (5s)",
+  "interaction-only": "First Interaction",
+  "conversion-only": "Conversion Pages Only",
+};
+
+function ScriptAnalysis({ profiling }: { profiling: ScriptProfilingResult }) {
+  return (
+    <div className="rounded-lg border border-border bg-bg-card">
+      <div className="px-6 py-4 border-b border-border">
+        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+          Script Analysis
+        </h3>
+        <p className="text-xs text-text-muted/60 mt-1">
+          Tracking script profiling and GTM trigger recommendations
+        </p>
+      </div>
+
+      {/* Summary bar */}
+      <div className="px-6 py-4 border-b border-border/50 flex flex-wrap items-center gap-4">
+        <div>
+          <p className="text-xs text-text-muted">Estimated Total TBT</p>
+          <p className="text-xl font-bold text-red-400">{profiling.totalEstimatedTbtMs}ms</p>
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">Total Script Size</p>
+          <p className="text-xl font-bold text-text">{profiling.totalEstimatedSizeKb}KB</p>
+        </div>
+        <div>
+          <p className="text-xs text-text-muted">Scripts Detected</p>
+          <p className="text-xl font-bold text-text">{profiling.profiles.length}</p>
+        </div>
+        {profiling.gtmContainerId && (
+          <div>
+            <p className="text-xs text-text-muted">GTM Container</p>
+            <p className="text-sm font-bold text-accent font-mono">{profiling.gtmContainerId}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Top-level recommendations */}
+      {profiling.recommendations.length > 0 && (
+        <div className="px-6 py-4 border-b border-border/50">
+          <p className="text-xs font-semibold text-accent uppercase tracking-wider mb-2">
+            Recommendations
+          </p>
+          <ul className="space-y-1.5">
+            {profiling.recommendations.map((rec, i) => (
+              <li key={i} className="text-sm text-text-muted flex items-start gap-2">
+                <span className="text-accent shrink-0 mt-0.5">-</span>
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Individual script profiles */}
+      <div className="divide-y divide-border/50">
+        {profiling.profiles.map((profile, i) => {
+          const style = PRIORITY_STYLES[profile.priority] || PRIORITY_STYLES.low;
+          return (
+            <div key={i} className={`px-6 py-4 ${style.bg}`}>
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${style.border} ${style.text} border`}>
+                  {style.label}
+                </span>
+                <span className="text-sm font-semibold text-text">{profile.vendorName}</span>
+                <span className="text-xs text-text-muted font-mono">
+                  ~{profile.estimatedTbtMs}ms TBT / ~{profile.estimatedSizeKb}KB
+                </span>
+              </div>
+              {profile.src && (
+                <p className="text-xs text-text-muted/60 font-mono mb-1.5 truncate">
+                  {profile.src}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-3 mb-2 text-xs">
+                <span className="text-text-muted">
+                  Current: <span className={profile.currentLoading === "blocking" ? "text-red-400 font-semibold" : "text-text"}>
+                    {LOADING_LABELS[profile.currentLoading] || profile.currentLoading}
+                  </span>
+                </span>
+                <span className="text-text-muted">
+                  Recommended: <span className="text-accent font-semibold">
+                    {TRIGGER_LABELS[profile.recommendedTrigger] || profile.recommendedTrigger}
+                  </span>
+                </span>
+              </div>
+              <p className="text-sm text-text-muted">{profile.recommendation}</p>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
