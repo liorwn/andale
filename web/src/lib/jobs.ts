@@ -49,6 +49,7 @@ export interface JobResult {
   changelog?: ChangeLogEntry[];
   outputPath?: string;
   deployUrl?: string;
+  hasScreenshots?: boolean;
 }
 
 export interface Job {

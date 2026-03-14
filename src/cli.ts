@@ -8,6 +8,7 @@ import { capture } from './capture.js'
 import { transform } from './transform.js'
 import { deploy } from './deploy.js'
 import { runLighthouse, buildComparison, renderComparisonTable, serveDirectory } from './report.js'
+import { takeScreenshot } from './screenshot.js'
 import type { EdgeCloneOptions } from './types.js'
 
 const program = new Command()
@@ -26,6 +27,7 @@ program
   .option('--viewport <WxH>', 'Browser viewport size', '1440x4000')
   .option('--chrome-path <path>', 'Path to Chrome/Chromium executable')
   .option('--report', 'Run Lighthouse and show before/after PageSpeed comparison')
+  .option('--diff', 'Screenshot original vs clone side-by-side')
   .option('--deploy <platform>', 'Deploy after clone (cloudflare, vercel)')
   .option('--name <name>', 'Project name for deployment (auto-generated from URL if omitted)')
   .action(async (url: string, opts: Record<string, any>) => {
@@ -102,7 +104,46 @@ program
     console.log(`  ${chalk.bold.green('✓')} ${chalk.bold(indexPath)}`)
     console.log(`  ${chalk.dim('Test prefill:')} ${chalk.cyan(url.split('?')[0] + '?email=test@example.com&fname=John&lname=Doe')}`)
 
-    // Step 4: Deploy (optional)
+    // Step 4: Visual diff (optional)
+    if (opts.diff) {
+      console.log(chalk.bold('  Visual Diff'))
+      console.log()
+
+      const originalScreenshot = join(outputDir, 'screenshot-original.png')
+      const cloneScreenshot = join(outputDir, 'screenshot-clone.png')
+
+      const diffSpinner = ora('Screenshotting original URL...').start()
+      try {
+        await takeScreenshot(url, originalScreenshot, {
+          width: vw,
+          height: 900,
+          chromePath: opts.chromePath,
+        })
+        diffSpinner.text = 'Screenshotting optimized clone...'
+        await takeScreenshot(indexPath, cloneScreenshot, {
+          width: vw,
+          height: 900,
+          chromePath: opts.chromePath,
+        })
+        diffSpinner.succeed('Screenshots captured')
+
+        console.log(`  Original: ${chalk.dim(originalScreenshot)}`)
+        console.log(`  Clone:    ${chalk.dim(cloneScreenshot)}`)
+        console.log()
+
+        // Open both in the default image viewer (macOS)
+        try {
+          const { execSync: exec } = await import('node:child_process')
+          exec(`open "${originalScreenshot}" "${cloneScreenshot}"`, { stdio: 'ignore' })
+        } catch {
+          // Non-macOS or `open` not available — no-op
+        }
+      } catch (err: any) {
+        diffSpinner.fail(`Screenshot failed: ${err.message}`)
+      }
+    }
+
+    // Step 5: Deploy (optional)
     if (opts.deploy) {
       const projectName = opts.name || new URL(url).pathname.replace(/\//g, '-').replace(/^-|-$/g, '') || 'andale-clone'
       const deploySpinner = ora(`Deploying to ${opts.deploy}...`).start()
@@ -115,7 +156,7 @@ program
       }
     }
 
-    // Step 5: Report (optional)
+    // Step 6: Report (optional)
     if (opts.report) {
       console.log()
       console.log(chalk.bold('  PageSpeed Report'))

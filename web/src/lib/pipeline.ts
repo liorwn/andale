@@ -67,9 +67,27 @@ export async function runPipeline(
     });
 
     updateJob(jobId, {
-      progress: 30,
+      progress: 25,
       message: `Captured ${Math.round(captureResult.originalSize / 1024)}KB`,
     });
+
+    // Screenshot the original URL
+    let hasScreenshots = false;
+    try {
+      const { takeScreenshot } = loadCoreModule("screenshot");
+      const originalScreenshotPath = join(outputDir, "screenshot-original.png");
+      await takeScreenshot(url, originalScreenshotPath, {
+        width: 1440,
+        height: 900,
+      });
+      hasScreenshots = true;
+      updateJob(jobId, {
+        progress: 30,
+        message: "Original screenshot captured",
+      });
+    } catch (err) {
+      console.warn("[andale] Screenshot of original URL failed:", err);
+    }
 
     // --- Stage 2: Transform ---
     updateJob(jobId, {
@@ -90,6 +108,25 @@ export async function runPipeline(
     // Write final HTML
     const indexPath = join(outputDir, "index.html");
     writeFileSync(indexPath, transformResult.html, "utf-8");
+
+    // Screenshot the optimized clone
+    if (hasScreenshots) {
+      try {
+        const { takeScreenshot } = loadCoreModule("screenshot");
+        const cloneScreenshotPath = join(outputDir, "screenshot-clone.png");
+        await takeScreenshot(indexPath, cloneScreenshotPath, {
+          width: 1440,
+          height: 900,
+        });
+        updateJob(jobId, {
+          progress: 55,
+          message: "Clone screenshot captured",
+        });
+      } catch (err) {
+        console.warn("[andale] Screenshot of clone failed:", err);
+        hasScreenshots = false;
+      }
+    }
 
     updateJob(jobId, {
       progress: 60,
@@ -133,6 +170,7 @@ export async function runPipeline(
           },
           outputPath: outputDir,
           changelog,
+          hasScreenshots,
         },
       });
       return;
@@ -178,6 +216,7 @@ export async function runPipeline(
         },
         outputPath: outputDir,
         changelog,
+        hasScreenshots,
       },
     });
   } catch (err: unknown) {

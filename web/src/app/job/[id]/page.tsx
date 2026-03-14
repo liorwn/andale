@@ -54,6 +54,7 @@ interface JobResult {
   changelog?: ChangeLogEntry[];
   outputPath?: string;
   deployUrl?: string;
+  hasScreenshots?: boolean;
 }
 
 interface JobData {
@@ -241,6 +242,11 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
         {/* Results */}
         {isDone && job.result && (
           <div className="flex flex-col gap-8">
+            {/* Visual Comparison */}
+            {job.result.hasScreenshots && (
+              <VisualComparison jobId={id} />
+            )}
+
             {/* Transform Stats */}
             {job.result.stats && <TransformStats stats={job.result.stats} />}
 
@@ -318,6 +324,51 @@ export default function JobPage({ params }: { params: Promise<{ id: string }> })
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function VisualComparison({ jobId }: { jobId: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-bg-card">
+      <div className="px-6 py-4 border-b border-border">
+        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
+          Visual Comparison
+        </h3>
+        <p className="text-xs text-text-muted/60 mt-1">
+          Above-the-fold screenshot at 1440px viewport
+        </p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+        <div>
+          <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 text-center">
+            Original
+          </p>
+          <div className="rounded-lg border border-border overflow-hidden bg-bg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/clone/${jobId}/screenshot/original`}
+              alt="Original page screenshot"
+              className="w-full h-auto"
+              loading="lazy"
+            />
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-accent uppercase tracking-wider mb-2 text-center">
+            Optimized Clone
+          </p>
+          <div className="rounded-lg border border-accent/30 overflow-hidden bg-bg">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/clone/${jobId}/screenshot/clone`}
+              alt="Optimized clone screenshot"
+              className="w-full h-auto"
+              loading="lazy"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
