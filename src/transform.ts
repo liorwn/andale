@@ -3,6 +3,7 @@ import { extractAndOptimizeImages } from './transform/optimize-images.js'
 import { injectFontPreloads } from './transform/preload-fonts.js'
 import { injectPrefill } from './transform/inject-prefill.js'
 import { optimizeImageLoading, addFontDisplaySwap, addPreconnectHints, preloadHeroImage } from './transform/optimize-loading.js'
+import { minifyHtml, minifyInlineCss, addDnsPrefetch } from './transform/minify.js'
 import type { TransformResult, ExtractedAsset, TransformStats, ChangeLogEntry } from './types.js'
 
 export interface TransformOptions {
@@ -99,11 +100,26 @@ export async function transform(
   current = heroResult.html
   changelog.push(...heroResult.changelog)
 
-  // Stage 8: Inject URL param prefill
+  // Stage 8: DNS prefetch for third-party origins
+  const dnsResult = addDnsPrefetch(current)
+  current = dnsResult.html
+  changelog.push(...dnsResult.changelog)
+
+  // Stage 9: Inject URL param prefill
   if (options.prefill) {
     current = injectPrefill(current)
     changelog.push({ type: 'injected', category: 'prefill', description: 'Injected URL parameter prefill script', detail: 'Supports ?email=&fname=&lname=&phone= for form pre-population' })
   }
+
+  // Stage 10: Minify inline CSS (before HTML minification)
+  const cssMinResult = minifyInlineCss(current)
+  current = cssMinResult.html
+  changelog.push(...cssMinResult.changelog)
+
+  // Stage 11: Minify HTML (LAST — after all modifications)
+  const htmlMinResult = await minifyHtml(current)
+  current = htmlMinResult.html
+  changelog.push(...htmlMinResult.changelog)
 
   const finalSize = Buffer.byteLength(current, 'utf-8')
   const totalAssetSize = assets.reduce((sum, a) => sum + a.optimizedSize, 0)

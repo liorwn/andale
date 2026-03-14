@@ -37,28 +37,26 @@ Requires **Node.js 22+** and **Google Chrome** (or Chromium).
 
 ## How It Works
 
-Andale runs a 5-stage pipeline on every URL:
+Andale runs an 11-stage optimization pipeline on every URL:
 
 ```
 URL
- |
+ │
+ ├─ 1. CAPTURE ........... Chrome headless renders the full page (JS/SPAs)
+ ├─ 2. DEFER TRACKING .... 20+ vendor scripts fire on first interaction, not on load
+ ├─ 3. EXTRACT IMAGES .... Embedded data URLs → WebP files (40-80% smaller)
+ ├─ 4. IMAGE LOADING ..... lazy/eager/fetchpriority/decoding attributes
+ ├─ 5. FONT DISPLAY ...... font-display: swap on all @font-face (no FOIT)
+ ├─ 6. PRECONNECT ........ Hints for external CDN origins (-100-300ms each)
+ ├─ 7. HERO PRELOAD ...... LCP image gets <link rel="preload">
+ ├─ 8. FONT PRELOAD ...... WOFF2 fonts get <link rel="preload">
+ ├─ 9. DNS PREFETCH ...... Third-party origins pre-resolved
+ ├─ 10. MINIFY CSS ....... Inline styles compressed (clean-css level 2)
+ ├─ 11. MINIFY HTML ...... Whitespace, comments, redundant attrs removed
+ └─ +  PREFILL ........... URL param prefill JS (?email=&fname=&lname=)
+ │
  v
- 1. CAPTURE ......... Chrome headless renders the page (waits for JS/SPAs)
- |
- v
- 2. DEFER ........... Tracking scripts converted to fire on first interaction
- |
- v
- 3. IMAGES .......... Embedded data URLs extracted and converted to WebP
- |
- v
- 4. FONTS ........... Discovered fonts get <link rel="preload"> injected
- |
- v
- 5. PREFILL ......... URL param prefill JS added (?email=&fname=&lname=)
- |
- v
-./output/index.html   (static, deployable, fast)
+./output/index.html   (static, deployable, sub-1-second)
 ```
 
 ---
