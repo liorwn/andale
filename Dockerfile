@@ -25,9 +25,7 @@ RUN ls -la /app/dist/capture.js && echo "Core built OK"
 RUN cd web && npm ci && rm -rf .next && npm run build
 RUN echo "Web built OK - no standalone mode"
 
-EXPOSE 3000
-ENV PORT=3000
 ENV NODE_ENV=production
 
 WORKDIR /app/web
-CMD ["npx", "next", "start", "-p", "3000"]
+CMD ["sh", "-c", "npx next start -p ${PORT:-3000}"]
