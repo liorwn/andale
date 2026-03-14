@@ -1,7 +1,6 @@
 FROM node:22-slim
 
-# Install Chromium for SingleFile capture + Lighthouse
-# Also install single-file-cli globally so it's available at runtime
+# Install Chromium + single-file-cli
 RUN apt-get update && apt-get install -y \
   chromium \
   fonts-liberation \
@@ -15,28 +14,16 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 WORKDIR /app
 
-# Install core library dependencies
-COPY package*.json ./
-RUN npm ci
+# Copy EVERYTHING first (simplest approach, no layer caching tricks)
+COPY . .
 
-# Copy core source and build TypeScript
-COPY src/ ./src/
-COPY tsconfig.json ./
-RUN npx tsc
+# Build core TypeScript
+RUN npm ci && npx tsc
+RUN ls -la /app/dist/capture.js && echo "Core built OK"
 
-# Verify core dist exists
-RUN ls -la /app/dist/capture.js /app/dist/transform.js /app/dist/report.js
-
-# Install web app dependencies
-COPY web/package*.json ./web/
-RUN cd web && npm ci
-
-# Cache bust: change this value to force a clean build
-ARG CACHE_BUST=v3
-
-# Copy web source and build
-COPY web/ ./web/
-RUN cd web && rm -rf .next && npm run build && echo "Build version: ${CACHE_BUST}"
+# Build web app
+RUN cd web && npm ci && rm -rf .next && npm run build
+RUN echo "Web built OK - no standalone mode"
 
 EXPOSE 3000
 ENV PORT=3000
