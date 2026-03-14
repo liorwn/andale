@@ -1,16 +1,24 @@
 {
-  "name": "andale",
+  "name": "andale-cli",
   "version": "0.1.0",
-  "description": "Clone any web page into a speed-optimized static site. Pixel-perfect rendering, deferred tracking, sub-1-second loads. ¡Ándale\\!",
+  "description": "Clone any web page into a speed-optimized static site. Pixel-perfect rendering, deferred tracking, sub-1-second loads.",
   "type": "module",
   "bin": {
     "andale": "./dist/cli.js"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/cli.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "pagespeed",
@@ -19,9 +27,26 @@
     "edge",
     "performance",
     "tracking",
-    "marketing"
+    "marketing",
+    "lighthouse",
+    "web-vitals",
+    "optimization",
+    "seo",
+    "landing-page"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liorwn/andale.git"
+  },
+  "homepage": "https://github.com/liorwn/andale#readme",
+  "bugs": {
+    "url": "https://github.com/liorwn/andale/issues"
+  },
+  "author": "Lior Weinstein <lior@cto.com>",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "chalk": "^5.6.2",
     "cheerio": "^1.2.0",
