@@ -38,7 +38,7 @@ function andale_get_settings() {
 		'excluded_paths'       => '',
 		'enabled'              => true,
 		// Server-side optimisation defaults (all on except skip_logged_in).
-		'server_optimize'      => false,
+		'server_optimize'      => true,
 		'opt_defer_scripts'    => true,
 		'opt_non_blocking_css' => true,
 		'opt_images'           => true,
