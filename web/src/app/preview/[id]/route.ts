@@ -59,8 +59,35 @@ export async function GET(
     `$1\n<meta name="robots" content="noindex, nofollow">`
   );
 
+  // Rewrite external image URLs to use the proxy endpoint
+  // This fixes hotlink-protected images (Sanity CDN, etc.) that block
+  // cross-origin loading when served from andale.sh
+  const proxyBase = `/preview/${id}/proxy?url=`
+  const withProxiedImages = withNoIndex
+    // Rewrite img src attributes pointing to external https URLs
+    .replace(
+      /(<img[^>]+src=["'])(https?:\/\/(?!andale\.sh)[^"']+)(["'])/gi,
+      (_match, before, url, after) => `${before}${proxyBase}${encodeURIComponent(url)}${after}`
+    )
+    // Rewrite srcset attributes
+    .replace(
+      /(<img[^>]+srcset=["'])([^"']+)(["'])/gi,
+      (_match, before, srcset, after) => {
+        const rewritten = srcset.replace(
+          /(https?:\/\/(?!andale\.sh)[^\s,]+)/g,
+          (url: string) => `${proxyBase}${encodeURIComponent(url)}`
+        )
+        return `${before}${rewritten}${after}`
+      }
+    )
+    // Rewrite CSS background-image: url(...) pointing to external URLs
+    .replace(
+      /(background(?:-image)?:\s*url\(["']?)(https?:\/\/(?!andale\.sh)[^"')]+)(["']?\))/gi,
+      (_match, before, url, after) => `${before}${proxyBase}${encodeURIComponent(url)}${after}`
+    )
+
   // Inject banner after <body> tag
-  const injectedHtml = withNoIndex.replace(
+  const injectedHtml = withProxiedImages.replace(
     /(<body[^>]*>)/i,
     `$1${banner}`
   );

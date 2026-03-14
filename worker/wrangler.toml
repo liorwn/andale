@@ -31,3 +31,23 @@ bucket_name = "andale-cache-ctox"
 [[env.ctox.routes]]
 pattern = "ctox.com/*"
 zone_name = "ctox.com"
+
+# ---------------------------------------------------------------------------
+# pdf2xl.com environment
+# ---------------------------------------------------------------------------
+[env.pdf2xl]
+name = "andale-pdf2xl"
+account_id = "1002e6f834adea2e1fdc6dc7e330ddb3"
+
+[env.pdf2xl.vars]
+CACHE_TTL_SECONDS = "3600"
+ANDALE_API_URL = "https://andale.sh"
+ORIGIN_URL = "https://pdf2xl.com"
+
+[[env.pdf2xl.r2_buckets]]
+binding = "CACHE"
+bucket_name = "andale-cache-pdf2xl"
+
+[[env.pdf2xl.routes]]
+pattern = "pdf2xl.com/*"
+zone_name = "pdf2xl.com"
