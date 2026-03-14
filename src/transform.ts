@@ -2,6 +2,7 @@ import { deferTracking, stripTracking } from './transform/defer-tracking.js'
 import { extractAndOptimizeImages } from './transform/optimize-images.js'
 import { injectFontPreloads } from './transform/preload-fonts.js'
 import { injectPrefill } from './transform/inject-prefill.js'
+import { optimizeImageLoading, addFontDisplaySwap, addPreconnectHints, preloadHeroImage } from './transform/optimize-loading.js'
 import type { TransformResult, ExtractedAsset, TransformStats, ChangeLogEntry } from './types.js'
 
 export interface TransformOptions {
@@ -78,7 +79,27 @@ export async function transform(
     changelog.push({ type: 'preloaded', category: 'font', description: `Added preload hints for ${fontResult.fontsPreloaded} WOFF2 font(s)`, detail: 'Eliminates font-loading flash (FOIT/FOUT)' })
   }
 
-  // Stage 4: Inject URL param prefill
+  // Stage 4: Optimize image loading attributes
+  const loadingResult = optimizeImageLoading(current)
+  current = loadingResult.html
+  changelog.push(...loadingResult.changelog)
+
+  // Stage 5: Add font-display: swap
+  const fontDisplayResult = addFontDisplaySwap(current)
+  current = fontDisplayResult.html
+  changelog.push(...fontDisplayResult.changelog)
+
+  // Stage 6: Add preconnect hints for external origins
+  const preconnectResult = addPreconnectHints(current)
+  current = preconnectResult.html
+  changelog.push(...preconnectResult.changelog)
+
+  // Stage 7: Preload hero/LCP image
+  const heroResult = preloadHeroImage(current)
+  current = heroResult.html
+  changelog.push(...heroResult.changelog)
+
+  // Stage 8: Inject URL param prefill
   if (options.prefill) {
     current = injectPrefill(current)
     changelog.push({ type: 'injected', category: 'prefill', description: 'Injected URL parameter prefill script', detail: 'Supports ?email=&fname=&lname=&phone= for form pre-population' })
