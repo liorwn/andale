@@ -551,7 +551,7 @@ class Andale_Optimizer {
 	['click','touchstart','keydown','scroll','mousemove'].forEach(function(e){
 		document.addEventListener(e,loadDeferred,{once:true,passive:true});
 	});
-	setTimeout(loadDeferred,15000);
+	setTimeout(loadDeferred,3000);
 })();
 </script>
 JS;
