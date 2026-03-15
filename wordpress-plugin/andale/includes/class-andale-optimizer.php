@@ -162,13 +162,10 @@ class Andale_Optimizer {
 				$html = $this->defer_tracking_scripts( $html );
 			}
 
-			if ( ! empty( $this->options['opt_delay_all_js'] ) ) {
-				try {
-					$html = $this->delay_all_scripts( $html );
-				} catch ( \Throwable $e2 ) {
-					error_log( 'Andale delay_all_scripts: ' . $e2->getMessage() );
-				}
-			}
+			// delay_all_scripts temporarily disabled — being rewritten
+			// if ( ! empty( $this->options['opt_delay_all_js'] ) ) {
+			// 	$html = $this->delay_all_scripts( $html );
+			// }
 
 			// Inject resource hints for preloaded assets.
 			$html = $this->add_resource_hints( $html );
