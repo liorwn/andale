@@ -3,7 +3,7 @@ Contributors: andale
 Tags: performance, pagespeed, core web vitals, tracking, optimization
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,12 @@ A quick-access link is also available on your WordPress admin dashboard widget.
 3. Admin notice — prompts you to add a Site ID if none is configured.
 
 == Changelog ==
+
+= 1.2.0 =
+* New: Delay ALL JavaScript execution (like WP Rocket's Delay JS). Fires all scripts on first interaction or 3s timeout — drops TBT to 0ms.
+* New: Critical CSS extraction — inline above-fold CSS, defer non-critical stylesheets.
+* Fix: JS delay timeout set to 3s for Lighthouse compatibility.
+* Fix: defer-script conversion also catches scripts already marked `defer` (HTML defer still parses at load time).
 
 = 1.1.0 =
 * New: Server-side HTML optimization via PHP output buffering.
