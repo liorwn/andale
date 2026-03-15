@@ -569,43 +569,83 @@ JS;
 	 * @return string Modified HTML.
 	 */
 	private function delay_all_scripts( $html ) {
-		$html = preg_replace_callback(
-			'/<script([^>]*?)src=["\']([^"\']+)["\']([^>]*?)>/i',
-			function( $matches ) {
-				$before = $matches[1];
-				$src    = $matches[2];
-				$after  = $matches[3];
-				$full   = $before . $after;
+		// Use simple string-based approach to avoid PCRE backtrack limit errors
+		// on large HTML pages
+		$output   = '';
+		$offset   = 0;
+		$html_len = strlen( $html );
 
-				// Skip async (still executes ASAP after download, can't delay)
-				// DO NOT skip defer — defer still parses at load time
-				// andale-deferred delays until user interaction = TBT 0ms
-				if ( preg_match( '/\basync\b/i', $full ) ) {
-					return $matches[0];
-				}
-				// Remove defer attr since we're converting to andale-deferred
-				$before = preg_replace( '/\bdefer\b/i', '', $before );
-				$after  = preg_replace( '/\bdefer\b/i', '', $after );
-				// Skip type=module
-				if ( preg_match( '/type\s*=\s*["\']module["\']/', $full ) ) {
-					return $matches[0];
-				}
-				// Skip if explicitly opted out
-				if ( strpos( $full, 'data-no-defer' ) !== false ) {
-					return $matches[0];
-				}
-				// Skip if already processed by tracking deferral (either mechanism)
-				if ( strpos( $full, 'text/andale-deferred' ) !== false ) {
-					return $matches[0];
-				}
+		while ( $offset < $html_len ) {
+			// Find next <script tag
+			$tag_start = stripos( $html, '<script', $offset );
+			if ( false === $tag_start ) {
+				$output .= substr( $html, $offset );
+				break;
+			}
 
-				// Convert to deferred — reuse the tracking defer loader mechanism
-				return '<script' . $before . 'type="text/andale-deferred" data-andale-src="' . esc_attr( $src ) . '"' . $after . '>';
-			},
-			$html
-		);
+			// Append everything before the tag
+			$output .= substr( $html, $offset, $tag_start - $offset );
 
-		// Inject the loader if not already present (tracking defer may have added it already).
+			// Find end of opening tag
+			$tag_end = strpos( $html, '>', $tag_start );
+			if ( false === $tag_end ) {
+				$output .= substr( $html, $tag_start );
+				break;
+			}
+
+			$tag     = substr( $html, $tag_start, $tag_end - $tag_start + 1 );
+			$offset  = $tag_end + 1;
+
+			// Only process external scripts (with src)
+			if ( stripos( $tag, ' src=' ) === false && stripos( $tag, "\tsrc=" ) === false ) {
+				$output .= $tag;
+				continue;
+			}
+
+			// Skip async scripts
+			if ( preg_match( '/\basync\b/i', $tag ) ) {
+				$output .= $tag;
+				continue;
+			}
+
+			// Skip type=module
+			if ( preg_match( '/type\s*=\s*["\']module["\']/', $tag ) ) {
+				$output .= $tag;
+				continue;
+			}
+
+			// Skip data-no-defer
+			if ( strpos( $tag, 'data-no-defer' ) !== false ) {
+				$output .= $tag;
+				continue;
+			}
+
+			// Skip already deferred
+			if ( strpos( $tag, 'text/andale-deferred' ) !== false ) {
+				$output .= $tag;
+				continue;
+			}
+
+			// Extract src value
+			if ( ! preg_match( '/src=["\']([^"\']+)["\']/', $tag, $src_match ) ) {
+				$output .= $tag;
+				continue;
+			}
+
+			$src = $src_match[1];
+
+			// Build new tag: remove src, defer attrs; add andale-deferred
+			$new_tag = preg_replace( '/\s*src=["\'][^"\']*["\']/', '', $tag );
+			$new_tag = preg_replace( '/\bdefer\b/i', '', $new_tag );
+			$new_tag = str_replace( 'type="text/javascript"', '', $new_tag );
+			$new_tag = preg_replace( '/<script/i', '<script type="text/andale-deferred" data-andale-src="' . htmlspecialchars( $src, ENT_QUOTES ) . '"', $new_tag, 1 );
+
+			$output .= $new_tag;
+		}
+
+		$html = $output;
+
+		// Inject the loader if not already present
 		if ( false === strpos( $html, 'function loadDeferred()' ) ) {
 			$loader = $this->get_deferred_loader_script();
 			$html   = preg_replace( '/<\/body>/i', $loader . "\n</body>", $html, 1 );
