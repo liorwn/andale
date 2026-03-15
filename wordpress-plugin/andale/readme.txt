@@ -3,7 +3,7 @@ Contributors: andale
 Tags: performance, pagespeed, core web vitals, tracking, optimization
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -94,6 +94,10 @@ A quick-access link is also available on your WordPress admin dashboard widget.
 3. Admin notice — prompts you to add a Site ID if none is configured.
 
 == Changelog ==
+
+= 1.3.1 =
+* Fix: Catch PHP Throwable (not just Exception) in optimize_html — prevents blank page on fatal errors.
+* Fix: delay_all_scripts wrapped in its own try-catch — crash won't break other optimizations.
 
 = 1.3.0 =
 * Fix: Rewrote delay_all_scripts() without regex to prevent PCRE backtrack limit crash on large pages.

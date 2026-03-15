@@ -3,7 +3,7 @@
  * Plugin Name: Andale Page Speed Optimizer
  * Plugin URI: https://andale.sh
  * Description: Automatically optimize your WordPress pages for sub-1-second loads. Defers tracking scripts, lazy-loads images, and reports Core Web Vitals to your Andale dashboard.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: Andale
  * Author URI: https://andale.sh
  * License: GPL v2 or later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ANDALE_VERSION', '1.3.0' );
+define( 'ANDALE_VERSION', '1.3.1' );
 define( 'ANDALE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ANDALE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'ANDALE_OPTION_KEY', 'andale_settings' );

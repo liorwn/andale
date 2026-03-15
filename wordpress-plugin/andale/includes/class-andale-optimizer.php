@@ -163,13 +163,17 @@ class Andale_Optimizer {
 			}
 
 			if ( ! empty( $this->options['opt_delay_all_js'] ) ) {
-				$html = $this->delay_all_scripts( $html );
+				try {
+					$html = $this->delay_all_scripts( $html );
+				} catch ( \Throwable $e2 ) {
+					error_log( 'Andale delay_all_scripts: ' . $e2->getMessage() );
+				}
 			}
 
 			// Inject resource hints for preloaded assets.
 			$html = $this->add_resource_hints( $html );
 
-		} catch ( Exception $e ) {
+		} catch ( \Throwable $e ) {
 			// Return original HTML unmodified on any error.
 			return $original;
 		}
