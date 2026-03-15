@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { deferTracking, identifyTrackingScripts } from '../src/transform/defer-tracking.js'
+import { deferTracking, deferAllScripts, identifyTrackingScripts } from '../src/transform/defer-tracking.js'
 import * as cheerio from 'cheerio'
 
 describe('defer-tracking', () => {
@@ -76,6 +76,44 @@ describe('defer-tracking', () => {
       const result = deferTracking(html)
       expect(result.deferredCount).toBe(0)
       expect(result.html).not.toContain('loadTracking')
+    })
+  })
+
+  describe('deferAllScripts', () => {
+    it('defers a regular external script', () => {
+      const html = '<html><head></head><body><script src="https://cdn.example.com/app.js"></script></body></html>'
+      const result = deferAllScripts(html)
+      expect(result.deferredCount).toBe(1)
+      expect(result.html).toContain('data-deferred-src="https://cdn.example.com/app.js"')
+      expect(result.html).toContain('type="text/deferred-tracking"')
+      expect(result.html).not.toContain(' src="https://cdn.example.com/app.js"')
+    })
+
+    it('skips scripts with async attribute', () => {
+      const html = '<html><head></head><body><script src="https://cdn.example.com/async.js" async></script></body></html>'
+      const result = deferAllScripts(html)
+      expect(result.deferredCount).toBe(0)
+      expect(result.html).toContain('src="https://cdn.example.com/async.js"')
+    })
+
+    it('skips scripts with defer attribute', () => {
+      const html = '<html><head></head><body><script src="https://cdn.example.com/deferred.js" defer></script></body></html>'
+      const result = deferAllScripts(html)
+      expect(result.deferredCount).toBe(0)
+      expect(result.html).toContain('src="https://cdn.example.com/deferred.js"')
+    })
+
+    it('skips scripts already deferred by deferTracking', () => {
+      const html = '<html><head></head><body><script type="text/deferred-tracking" data-deferred-src="https://www.googletagmanager.com/gtm.js"></script></body></html>'
+      const result = deferAllScripts(html)
+      expect(result.deferredCount).toBe(0)
+    })
+
+    it('injects the loader script when scripts are deferred', () => {
+      const html = '<html><head></head><body><script src="https://cdn.example.com/app.js"></script></body></html>'
+      const result = deferAllScripts(html)
+      expect(result.deferredCount).toBe(1)
+      expect(result.html).toContain('function loadTracking()')
     })
   })
 })

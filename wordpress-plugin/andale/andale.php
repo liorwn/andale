@@ -45,6 +45,7 @@ function andale_get_settings() {
 		'opt_font_display'     => true,
 		'opt_preconnect'       => true,
 		'opt_defer_tracking'   => true,
+		'opt_delay_all_js'     => false, // Default off — powerful but may break interactive elements
 		'opt_critical_css'     => false, // Default off — too aggressive for most sites
 		'skip_logged_in'       => true,
 	);

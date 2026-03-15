@@ -103,6 +103,7 @@ export async function runPipeline(
       stripTracking: false,
       prefill: true,
       optimizeImages: true,
+      delayAllJs: true,
     });
 
     // Write final HTML

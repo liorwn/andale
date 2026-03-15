@@ -28,6 +28,7 @@ program
   .option('--chrome-path <path>', 'Path to Chrome/Chromium executable')
   .option('--report', 'Run Lighthouse and show before/after PageSpeed comparison')
   .option('--diff', 'Screenshot original vs clone side-by-side')
+  .option('--delay-all-js', 'Delay ALL JavaScript execution to post-interaction (like WP Rocket). Drops TBT to 0ms.')
   .option('--deploy <platform>', 'Deploy after clone (cloudflare, vercel)')
   .option('--name <name>', 'Project name for deployment (auto-generated from URL if omitted)')
   .action(async (url: string, opts: Record<string, any>) => {
@@ -68,6 +69,7 @@ program
         stripTracking: !!opts.stripTracking,
         prefill: opts.prefill !== false,
         optimizeImages: opts.optimizeImages !== false,
+        delayAllJs: !!opts.delayAllJs,
       })
       const transformTime = Date.now() - start
       transformSpinner.succeed(`Optimized in ${(transformTime / 1000).toFixed(1)}s`)

@@ -162,6 +162,10 @@ class Andale_Optimizer {
 				$html = $this->defer_tracking_scripts( $html );
 			}
 
+			if ( ! empty( $this->options['opt_delay_all_js'] ) ) {
+				$html = $this->delay_all_scripts( $html );
+			}
+
 			// Inject resource hints for preloaded assets.
 			$html = $this->add_resource_hints( $html );
 
@@ -552,6 +556,57 @@ class Andale_Optimizer {
 </script>
 JS;
 		// phpcs:enable
+	}
+
+	/**
+	 * Delay ALL external scripts to post-interaction (like WP Rocket's Delay JS).
+	 *
+	 * Converts every external <script src="..."> that isn't already async/defer/module
+	 * into a deferred script using the same `text/andale-deferred` + `data-andale-src`
+	 * mechanism used by defer_tracking_scripts(). The existing loader handles both.
+	 *
+	 * @param  string $html HTML string.
+	 * @return string Modified HTML.
+	 */
+	private function delay_all_scripts( $html ) {
+		$html = preg_replace_callback(
+			'/<script([^>]*?)src=["\']([^"\']+)["\']([^>]*?)>/i',
+			function( $matches ) {
+				$before = $matches[1];
+				$src    = $matches[2];
+				$after  = $matches[3];
+				$full   = $before . $after;
+
+				// Skip if already has async or defer
+				if ( preg_match( '/\b(async|defer)\b/i', $full ) ) {
+					return $matches[0];
+				}
+				// Skip type=module
+				if ( preg_match( '/type\s*=\s*["\']module["\']/', $full ) ) {
+					return $matches[0];
+				}
+				// Skip if explicitly opted out
+				if ( strpos( $full, 'data-no-defer' ) !== false ) {
+					return $matches[0];
+				}
+				// Skip if already processed by tracking deferral (either mechanism)
+				if ( strpos( $full, 'text/andale-deferred' ) !== false ) {
+					return $matches[0];
+				}
+
+				// Convert to deferred — reuse the tracking defer loader mechanism
+				return '<script' . $before . 'type="text/andale-deferred" data-andale-src="' . esc_attr( $src ) . '"' . $after . '>';
+			},
+			$html
+		);
+
+		// Inject the loader if not already present (tracking defer may have added it already).
+		if ( false === strpos( $html, 'function loadDeferred()' ) ) {
+			$loader = $this->get_deferred_loader_script();
+			$html   = preg_replace( '/<\/body>/i', $loader . "\n</body>", $html, 1 );
+		}
+
+		return $html;
 	}
 
 	// =========================================================================

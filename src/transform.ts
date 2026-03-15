@@ -1,4 +1,4 @@
-import { deferTracking, stripTracking } from './transform/defer-tracking.js'
+import { deferTracking, stripTracking, deferAllScripts } from './transform/defer-tracking.js'
 import { profileScripts } from './transform/profile-scripts.js'
 import { extractAndOptimizeImages } from './transform/optimize-images.js'
 import { injectFontPreloads } from './transform/preload-fonts.js'
@@ -12,6 +12,7 @@ export interface TransformOptions {
   stripTracking: boolean
   prefill: boolean
   optimizeImages: boolean
+  delayAllJs?: boolean  // Defer ALL scripts, not just tracking — TBT drops to 0ms
 }
 
 export async function transform(
@@ -49,6 +50,20 @@ export async function transform(
     }
     if (result.deferredCount > 0) {
       changelog.push({ type: 'injected', category: 'tracking', description: 'Injected deferred tracking loader script' })
+    }
+  }
+
+  // Stage 1b: Delay ALL scripts (if enabled)
+  if (options.delayAllJs) {
+    const result = deferAllScripts(current)
+    current = result.html
+    if (result.deferredCount > 0) {
+      changelog.push({
+        type: 'deferred',
+        category: 'tracking',
+        description: `Delayed ${result.deferredCount} additional script(s) to post-interaction`,
+        detail: 'All JS fires on first click/touch/mouse/key or 15s timeout — TBT drops to 0ms'
+      })
     }
   }
 

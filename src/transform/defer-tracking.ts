@@ -164,6 +164,44 @@ export function deferTracking(html: string): { html: string; deferredCount: numb
   return { html: $.html(), deferredCount, vendors: [...vendors] }
 }
 
+/**
+ * Defer ALL external scripts to post-interaction.
+ * Like WP Rocket's "Delay JavaScript Execution" — drops TBT to 0ms.
+ * Excludes: scripts with async/defer already, type=module, data-no-defer,
+ * and scripts already deferred by deferTracking().
+ */
+export function deferAllScripts(html: string): { html: string; deferredCount: number } {
+  const $ = cheerio.load(html, { decodeEntities: false } as any)
+  let deferredCount = 0
+
+  $('script[src]').each((_, el) => {
+    const $el = $(el)
+    const src = $el.attr('src') || ''
+
+    // Skip if already async, defer, or type=module
+    if ($el.attr('async') !== undefined || $el.attr('defer') !== undefined) return
+    if (($el.attr('type') || '').includes('module')) return
+    // Skip if already deferred by tracking deferral
+    if ($el.attr('type') === 'text/deferred-tracking') return
+    // Skip if explicitly opted out
+    if ($el.attr('data-no-defer') !== undefined) return
+    // Skip empty src
+    if (!src) return
+
+    $el.attr('data-deferred-src', src)
+    $el.removeAttr('src')
+    $el.attr('type', 'text/deferred-tracking')
+    deferredCount++
+  })
+
+  // Inject loader if we deferred anything and it's not already there
+  if (deferredCount > 0 && !html.includes('function loadTracking()')) {
+    $('body').append(DEFERRED_LOADER)
+  }
+
+  return { html: $.html(), deferredCount }
+}
+
 export function stripTracking(html: string): { html: string; strippedCount: number; vendors: string[] } {
   const $ = cheerio.load(html, { decodeEntities: false } as any)
   let strippedCount = 0
