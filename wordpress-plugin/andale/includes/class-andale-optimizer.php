@@ -635,8 +635,9 @@ JS;
 			'/<link([^>]+)rel=["\']stylesheet["\']([^>]*)>/i',
 			function ( $m ) use ( &$count ) {
 				$count++;
-				// Keep first stylesheet synchronous (theme critical CSS).
-				if ( 1 === $count ) {
+				// Keep first 3 stylesheets synchronous (theme + critical plugin CSS).
+				// Deferring too many causes FOUC and hurts FCP.
+				if ( $count <= 3 ) {
 					return $m[0];
 				}
 				// Extract href.
