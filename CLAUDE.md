@@ -35,7 +35,7 @@ andale <url>       # Use from anywhere
 ## Test
 
 ```bash
-npm test               # Run all 23 tests
+npm test               # Run all 85 tests
 npm run test:watch     # Watch mode
 ```
 
@@ -60,6 +60,25 @@ tests/
   preload-fonts.test.ts
   inject-prefill.test.ts
   transform.test.ts
+  profile-scripts.test.ts       # Script profiling + GTM recommendations
+  deploy.test.ts                # Cloudflare/Vercel auto-deploy
+  report.test.ts                # Lighthouse before/after report
+web/                             # Next.js 16 web app (andale.sh)
+  src/app/
+    page.tsx                    # Landing page (paste URL → clone)
+    job/[id]/page.tsx           # Clone job status/results page
+    install/page.tsx            # JS-snippet install instructions
+    api/
+      clone/route.ts            # Kick off a clone job
+      clone/[id]/{progress,result,download,screenshot}/route.ts
+      preview/[id]/route.ts     # Live preview + proxy + assets (noindex, 24h cleanup)
+      optimize/route.ts         # Core optimization endpoint (+ route.test.ts)
+      snippet/[siteId]/route.ts # Client-side JS snippet (o.js) per registered site
+      sites/route.ts            # Registered-site CRUD
+      cache/purge/route.ts      # Cloudflare Worker/R2 cache purge
+      beacon/route.ts           # Client telemetry beacon
+      verify-install/route.ts   # Verifies snippet install on a live site
+  src/lib/{jobs,pipeline,sites}.ts
 ```
 
 ## CLI Options
@@ -111,8 +130,8 @@ The key insight: marketing pages are slow because tracking scripts block paint. 
 - [x] 11-stage optimization pipeline (tracking, images, fonts, loading, minification)
 - [x] Developer changelog in output
 - [x] `--diff` — screenshot original vs clone side-by-side
-- [ ] npm publish as `andale-cli`
-- [ ] GitHub Actions CI
+- [ ] npm publish as `andale-cli` (package.json ready at `0.1.0`, `publish.yml` wired to tag pushes — no `v*` tag cut yet, not on the npm registry)
+- [x] GitHub Actions CI — `.github/workflows/ci.yml` (build+test+typecheck on push/PR) and `publish.yml` (npm publish on `v*` tag)
 
 ### v0.3 — Web App (andale.sh) (IN PROGRESS)
 - [x] Web frontend — paste a URL, get optimized clone + PageSpeed report
